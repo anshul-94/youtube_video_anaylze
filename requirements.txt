@@ -1,0 +1,17 @@
+flask
+requests
+youtube-transcript-api
+
+langchain
+langchain-community
+langchain-core
+
+sentence-transformers
+
+faiss-cpu
+
+tiktoken
+
+pydantic
+
+python-dotenv
