@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Handle Analysis
-    analyzeBtn.addEventListener('click', () => {
+    analyzeBtn.addEventListener('click', async () => {
+        if (isLoading) return; // Prevent multiple clicks
+        
         const url = youtubeUrlInput.value.trim();
         const videoId = getYoutubeID(url);
 
@@ -44,16 +46,35 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Show Loading
         loadingOverlay.style.display = 'flex';
+        setLoading(true);
 
-        // Simulate API Delay
-        setTimeout(() => {
+        try {
+            const response = await fetch('http://localhost:8000/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Analysis failed');
+            }
+
+            const res = await response.json();
+            if (!res.success) throw new Error(res.error || 'Analysis failed');
+            displayResults(videoId, res.data);
+        } catch (error) {
+            console.error("Analysis Error:", error);
+            addMessage("Error: " + error.message, false);
+            alert("Error analyzing video: " + error.message);
+        } finally {
             loadingOverlay.style.display = 'none';
-            displayResults(videoId);
-        }, 2000);
+            setLoading(false);
+        }
     });
 
-    function displayResults(videoId) {
-        // Clear previous results (including empty state)
+    function displayResults(videoId, data) {
+        // Clear previous results
         analysisGrid.innerHTML = '';
 
         // 1. Update Left Panel (Video)
@@ -61,54 +82,20 @@ document.addEventListener('DOMContentLoaded', () => {
         videoPreview.style.display = 'block';
         videoInfo.style.display = 'block';
         
-        // Mock Video Meta
-        vidTitle.textContent = "Mastering Glassmorphism: The Ultimate Guide to Modern UI";
-        vidChannel.textContent = "Design Academy Pro";
-        vidDate.textContent = "Published: Mar 15, 2026";
-        vidPlaylist.textContent = "Creative Coding Series";
+        vidTitle.textContent = data.title;
+        vidChannel.textContent = data.channel;
+        vidDate.textContent = `Published: ${new Date().toLocaleDateString()}`;
+        vidPlaylist.textContent = "AI Analysis";
 
         // 2. Update Center Panel (Analysis)
         const analysisData = [
-            {
-                icon: 'file-text',
-                title: 'Short Summary',
-                content: 'An in-depth exploration of glassmorphism design, focusing on CSS-only techniques for creating layered, blurred, and transparent UI components that feel premium and modern.'
-            },
-            {
-                icon: 'target',
-                title: 'Main Topic',
-                content: 'Glassmorphism Design & CSS Implementation'
-            },
-            {
-                icon: 'compass',
-                title: 'Video Motive / Purpose',
-                content: 'To bridge the gap between static design concepts and functional web implementations using modern browser features.'
-            },
-            {
-                icon: 'book-open',
-                title: 'What the creator is teaching',
-                content: 'Effective use of backdrop-filter, managing color contrast on transparent backgrounds, and layering box-shadows for depth.'
-            },
-            {
-                icon: 'list',
-                title: 'Key Concepts / Key Points',
-                content: '• Backdrop-filter blur\n• Semi-transparent borders\n• Z-index layering\n• Accessibility in Glassmorphism'
-            },
-            {
-                icon: 'users',
-                title: 'Who should watch this video',
-                content: 'Front-end developers and UI/UX designers looking to elevate their visual design skills and technical implementation.'
-            },
-            {
-                icon: 'bar-chart',
-                title: 'Estimated Difficulty Level',
-                content: '<span class="difficulty-badge">Intermediate</span>'
-            },
-            {
-                icon: 'clock',
-                title: 'Important Timestamps',
-                content: '• 02:45 Intro to Blur\n• 05:20 Border Layering\n• 08:15 Contrast Fixes\n• 12:40 Final Example'
-            }
+            { icon: 'file-text', title: 'Short Summary', content: data.summary },
+            { icon: 'target', title: 'Main Topic', content: data.main_topic },
+            { icon: 'compass', title: 'Video Motive / Purpose', content: data.motive },
+            { icon: 'book-open', title: 'What the creator is teaching', content: data.teaching },
+            { icon: 'list', title: 'Key Points', content: data.key_points.join('\n') },
+            { icon: 'users', title: 'What you will learn', content: data.learning },
+            { icon: 'bar-chart', title: 'Difficulty Level', content: `<span class="difficulty-badge">${data.difficulty}</span>`, isHtml: true }
         ];
 
         analysisData.forEach(item => {
@@ -119,22 +106,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 class="card-title">${item.title}</h3>
                 <p class="card-content">${item.content}</p>
             `;
+            if (item.isHtml) {
+                card.querySelector('.card-content').innerHTML = item.content;
+            }
             analysisGrid.appendChild(card);
         });
 
-        // REFRESH LUCIDE ICONS
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         // 3. Update Chat Panel
-        addMessage("I've finished analyzing the video! You can ask me to summarize specific parts, create a quiz, or explain the main concepts.", false);
+        addMessage(`I've finished analyzing "${data.title}"! You can ask me anything about it.`, false);
+        window.currentVideoContext = data; 
     }
 
     // Chat Functionality
     let isLoading = false;
 
     function addMessage(text, isUser = false, isHtml = false) {
+        if (!text) return;
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${isUser ? 'user' : 'bot'}`;
         
@@ -145,12 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         chatMessages.appendChild(msgDiv);
-        
-        // Smooth scroll to bottom
-        chatMessages.scrollTo({
-            top: chatMessages.scrollHeight,
-            behavior: 'smooth'
-        });
+        chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
     }
 
     function setLoading(loading) {
@@ -159,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sendBtn.disabled = loading;
         
         if (loading) {
-            // Add typing indicator
             const typingDiv = document.createElement('div');
             typingDiv.className = 'typing-indicator';
             typingDiv.id = 'typingIndicator';
@@ -167,14 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
             chatMessages.appendChild(typingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         } else {
-            // Remove typing indicator
             const indicator = document.getElementById('typingIndicator');
             if (indicator) indicator.remove();
         }
     }
-
-    // Initial greeting
-    addMessage("Hello! I'm your AI Video Assistant. Paste a YouTube video link and I will analyze it for you. You can ask me for summaries, key points, or explanations from the video.", false);
 
     sendBtn.addEventListener('click', async () => {
         const text = chatInput.value.trim();
@@ -186,23 +165,29 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(true);
 
         try {
-            // Simulate API Delay with Promise
-            const response = await new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    // Simulate occasional error for testing (comment out for production)
-                    // if (Math.random() > 0.9) reject(new Error("Simulated failure"));
-                    
-                    const aiResponse = generateAIResponse(text);
-                    resolve(aiResponse);
-                }, 1500);
+            const response = await fetch('http://localhost:8000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: text })
             });
 
+            if (!response.ok) {
+                let errDetail = 'Chat failed';
+                try {
+                    const errData = await response.json();
+                    errDetail = errData.error || errDetail;
+                } catch(e) {}
+                throw new Error(errDetail);
+            }
+
+            const res = await response.json();
+            if (!res.success) throw new Error(res.error || 'Chat failed');
             setLoading(false);
-            addMessage(response, false);
+            addMessage(res.data.answer, false);
         } catch (error) {
             console.error("Chat Error:", error);
             setLoading(false);
-            addMessage("Something went wrong. Please try again.", false);
+            addMessage(`❌ Error: ${error.message}`, false);
         }
     });
 
@@ -228,20 +213,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
-// Global Utilities
+// Global Utilities (Fixed to use real data)
 window.copySummary = () => {
-    const summary = "Mastering Glassmorphism Summary: This video covers CSS-only techniques for creating premium transparent UI components. Key points include backdrop-filter, contrast management, and layering.";
-    navigator.clipboard.writeText(summary).then(() => {
-        alert("Summary copied to clipboard!");
+    if (!window.currentVideoContext) {
+        alert("Please analyze a video first.");
+        return;
+    }
+    const data = window.currentVideoContext;
+    const summaryText = `${data.title} Summary:\n${data.summary}\n\nKey Points:\n${data.key_points.join('\n')}`;
+    navigator.clipboard.writeText(summaryText).then(() => {
+        alert("Summary and Key Points copied to clipboard!");
     });
 };
 
 window.downloadSummary = () => {
-    const notes = "AI VIDEO ANALYSIS NOTES\n\nVideo: Mastering Glassmorphism\n\nSummary: Exploration of glassmorphism design...\nKey Concepts:\n- Backdrop-filter blur\n- Semi-transparent borders\n- Z-index layering\n\nDifficulty: Intermediate";
+    if (!window.currentVideoContext) {
+        alert("Please analyze a video first.");
+        return;
+    }
+    const data = window.currentVideoContext;
+    const notes = `AI VIDEO ANALYSIS NOTES\n\nTitle: ${data.title}\nChannel: ${data.channel}\n\nSummary:\n${data.summary}\n\nMain Topic: ${data.main_topic}\n\nKey Points:\n${data.key_points.join('\n- ')}\n\nLearning Outcome: ${data.learning}\nDifficulty: ${data.difficulty}`;
     const blob = new Blob([notes], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'video-analysis-notes.txt';
+    a.download = `${data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_notes.txt`;
     a.click();
 };
