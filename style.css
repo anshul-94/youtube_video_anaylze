@@ -505,3 +505,40 @@ input::placeholder {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+.btn-utility {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+
+    padding: 4px 10px;          /* smaller */
+    border-radius: 6px;         /* tighter */
+    font-size: 0.75rem;         /* compact text */
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(6px);
+}
+
+/* icon size control */
+.btn-utility i {
+    width: 14px;
+    height: 14px;
+}
+
+/* hover effect */
+.btn-utility:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* active click feel */
+.btn-utility:active {
+    transform: scale(0.96);
+}

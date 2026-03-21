@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAI'27 | AI Video Assistant</title>
+    <title>XAI'27, Video Assistant</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,10 +16,7 @@
     <div class="dashboard-wrapper">
         <!-- LEFT PANEL: Video & Input -->
         <aside class="side-panel left-panel glass">
-            <div class="panel-header">
-                <i data-lucide="video" class="header-icon"></i>
-                <h2>Video Analysis</h2>
-            </div>
+
             
             <div class="input-container">
                 <div class="input-wrapper">
@@ -51,13 +48,20 @@
         <main class="main-panel center-panel">
             <header class="dashboard-header">
                 <div class="logo-area">
-                    <h1 class="logo-text">XAI'27 AI Video Analyzer</h1>
+                    <h1 class="logo-text"> Video Analyzer</h1>
                     <p class="subtitle">Paste a YouTube video link to generate an AI summary, key insights, and chat with the video assistant.</p>
                 </div>
-                <div class="header-actions">
-                    <button class="btn-utility" onclick="copySummary()"><i data-lucide="copy"></i> Copy Summary</button>
-                    <button class="btn-utility" onclick="downloadSummary()"><i data-lucide="download"></i> Download Notes</button>
-                </div>
+<div class="header-actions">
+    <button class="btn-utility" onclick="copySummary()">
+        <i data-lucide="copy"></i>
+        Copy
+    </button>
+
+    <button class="btn-utility" onclick="downloadSummary()">
+        <i data-lucide="download"></i>
+        Download
+    </button>
+</div>
             </header>
 
             <div class="analysis-grid" id="analysisGrid">
@@ -73,8 +77,7 @@
         <!-- RIGHT PANEL: AI Chatbot -->
         <aside class="side-panel right-panel glass">
             <div class="panel-header">
-                <i data-lucide="bot" class="header-icon"></i>
-                <h2>Chat Assistant</h2>
+                <h2><i data-lucide="bot" class="header-icon"></i>Chat Assistant</h2>
             </div>
 
             <div class="chat-container">
@@ -87,6 +90,8 @@
                         <button class="chip" onclick="askQuestion('Summarize video')">Summarize video</button>
                         <button class="chip" onclick="askQuestion('Explain main concept')">Explain main concept</button>
                         <button class="chip" onclick="askQuestion('Give key points')">Give key points</button>
+                        <button class="chip" onclick="askQuestion('Explain like I am a beginner')">Beginner Friendly</button>
+
                     </div>
                     <div class="chat-input-area">
                         <input type="text" class="chat-input" id="chatInput" placeholder="Ask anything about this video...">

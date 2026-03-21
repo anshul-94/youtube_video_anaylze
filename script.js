@@ -94,8 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { icon: 'compass', title: 'Video Motive / Purpose', content: data.motive },
             { icon: 'book-open', title: 'What the creator is teaching', content: data.teaching },
             { icon: 'list', title: 'Key Points', content: data.key_points.join('\n') },
-            { icon: 'users', title: 'What you will learn', content: data.learning },
-            { icon: 'bar-chart', title: 'Difficulty Level', content: `<span class="difficulty-badge">${data.difficulty}</span>`, isHtml: true }
+            { icon: 'users', title: 'What you will learn', content: data.learning }
         ];
 
         analysisData.forEach(item => {
