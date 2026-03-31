@@ -45,15 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
         youtubeUrlInput.style.borderColor = 'var(--glass-border)';
         
         // Show Loading
-        loadingOverlay.style.display = 'flex';
+        showLoader();
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8000/analyze', {
+            const minTime = new Promise(res => setTimeout(res, 1500));
+            const apiCall = fetch('http://localhost:8000/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url })
             });
+
+            const [_, response] = await Promise.all([minTime, apiCall]);
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -68,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addMessage("Error: " + error.message, false);
             alert("Error analyzing video: " + error.message);
         } finally {
-            loadingOverlay.style.display = 'none';
+            hideLoader();
             setLoading(false);
         }
     });
@@ -239,3 +242,61 @@ window.downloadSummary = () => {
     a.download = `${data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_notes.txt`;
     a.click();
 };
+
+
+let startTime;
+let interval;
+let failsafeTimeout;
+
+function showLoader() {
+  const overlay = document.getElementById("loadingOverlay");
+  const text = document.getElementById("loadingText");
+
+  clearInterval(interval);
+  clearTimeout(failsafeTimeout);
+
+  overlay.style.display = "flex";
+  overlay.style.opacity = "1";
+
+  startTime = Date.now();
+  text.innerText = `Analyzing video content... (0.0s)`;
+
+  interval = setInterval(() => {
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    text.innerText = `Analyzing video content... (${elapsed}s)`;
+  }, 100);
+
+  // FAILSAFE
+  failsafeTimeout = setTimeout(() => {
+    clearInterval(interval);
+    text.innerText = "Taking longer than expected...";
+    setTimeout(() => {
+      hideLoader();
+    }, 2000); // Wait 2s before force hiding
+  }, 10000);
+}
+
+function hideLoader() {
+  const overlay = document.getElementById("loadingOverlay");
+  const text = document.getElementById("loadingText");
+
+  clearInterval(interval);
+  clearTimeout(failsafeTimeout);
+
+  const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+  if (text.innerText !== "Taking longer than expected...") {
+    text.innerText = `Responded in ${totalTime}s`;
+  }
+
+  // Smooth fade out
+  setTimeout(() => {
+    overlay.style.opacity = "0";
+    overlay.style.transition = "opacity 0.3s ease";
+
+    setTimeout(() => {
+      overlay.style.display = "none";
+      overlay.style.opacity = "1";
+    }, 300);
+  }, 500);
+}
+
