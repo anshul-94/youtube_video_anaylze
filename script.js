@@ -197,15 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter' && !isLoading) sendBtn.click();
     });
 
-    // Mock AI Logic
-    function generateAIResponse(query) {
-        query = query.toLowerCase();
-        if (query.includes('summarize')) return "In short, the video teaches how to use CSS 'backdrop-filter: blur' with semi-transparent borders to create a glass-like effect while maintaining readability.";
-        if (query.includes('concept')) return "The main concept is the 'layering' system where you use multiple thin borders and subtle shadows to simulate depth without heavy colors.";
-        if (query.includes('notes')) return "Notes generated: 1. Always use high-contrast text. 2. Border should be 1px solid rgba(255,255,255,0.1). 3. Blur radius should be between 8-16px.";
-        if (query.includes('quiz')) return "Here's a quick question: Which CSS property is essential for the frosted glass effect? (Answer: backdrop-filter)";
-        return "That's a great question! Based on the video content, this relates to the 'Visual Hierarchy' section mentioned around the 8-minute mark.";
-    }
 
     // Global helper for chips
     window.askQuestion = (text) => {
