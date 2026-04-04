@@ -204,6 +204,67 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = text;
         sendBtn.click();
     };
+
+    // PANEL RESIZING LOGIC
+    const resizeHandle = document.getElementById('resizeHandle');
+    const rightPanel = document.querySelector('.right-panel');
+    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+    
+    // Load last width from localStorage
+    const savedWidth = localStorage.getItem('chatPanelWidth');
+    if (savedWidth) {
+        const width = Math.min(Math.max(parseInt(savedWidth), 280), 600);
+        rightPanel.style.flexBasis = `${width}px`;
+        rightPanel.style.width = `${width}px`;
+    }
+
+    let isResizing = false;
+
+    // Start Resizing
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        resizeHandle.classList.add('active');
+        
+        // Disable transitions during drag for immediate feedback
+        rightPanel.style.transition = 'none';
+        
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', stopResizing);
+        e.preventDefault(); // Stop text selection
+    });
+
+    function handleMouseMove(e) {
+        if (!isResizing) return;
+        
+        // Calculate width: from right edge to cursor
+        const containerRect = dashboardWrapper.getBoundingClientRect();
+        const newWidth = containerRect.right - e.clientX;
+        
+        // Apply Constraints (280px - 600px)
+        if (newWidth >= 280 && newWidth <= 600) {
+            rightPanel.style.flexBasis = `${newWidth}px`;
+            rightPanel.style.width = `${newWidth}px`;
+        }
+    }
+
+    function stopResizing() {
+        if (!isResizing) return;
+        
+        isResizing = false;
+        document.body.style.cursor = 'default';
+        resizeHandle.classList.remove('active');
+        
+        // Re-enable transitions
+        rightPanel.style.transition = 'flex-basis 0.2s ease, width 0.2s ease';
+        
+        // Save current width to local storage
+        const currentWidth = rightPanel.offsetWidth;
+        localStorage.setItem('chatPanelWidth', currentWidth);
+        
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', stopResizing);
+    }
 });
 
 // Global Utilities (Fixed to use real data)
