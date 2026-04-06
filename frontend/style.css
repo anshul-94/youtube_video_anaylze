@@ -262,6 +262,39 @@ input::placeholder {
     gap: var(--space-3);
 }
 
+.video-preview-container {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.video-preview-container.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.video-placeholder {
+    aspect-ratio: 16/9;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--glass-border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 20px;
+    text-align: center;
+}
+
+.video-placeholder i {
+    width: 32px;
+    height: 32px;
+    opacity: 0.3;
+}
+
 .video-player {
     aspect-ratio: 16/9;
     border-radius: var(--radius-lg);
@@ -341,6 +374,29 @@ input::placeholder {
     transition: var(--transition);
 }
 
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.accordion-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+    display: none; /* Hidden by default (desktop) */
+}
+
+.analysis-card.active .accordion-icon {
+    transform: rotate(180deg);
+}
+
+.card-body {
+    display: block; /* Visible by default (desktop) */
+}
+
 .analysis-card:hover {
     transform: translateY(-4px);
     border-color: rgba(34, 197, 94, 0.2);
@@ -351,13 +407,17 @@ input::placeholder {
     width: 24px;
     height: 24px;
     color: var(--secondary);
-    margin-bottom: var(--space-2);
+    margin-right: 4px;
+}
+
+/* On desktop, remove margin-bottom if it's there */
+.card-header .card-icon {
+    margin-bottom: 0;
 }
 
 .card-title {
     font-size: 1rem;
     font-weight: 700;
-    margin-bottom: var(--space-1);
     color: var(--text-primary);
 }
 
@@ -365,8 +425,38 @@ input::placeholder {
     font-size: 0.9rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    flex-grow: 1; /* Push content to fill space */
-    white-space: pre-wrap; /* Ensure line breaks are preserved */
+    padding-top: var(--space-2);
+    white-space: pre-wrap;
+}
+
+/* =============================================================
+   MOBILE OVERRIDES FOR ACCORDION
+   ============================================================= */
+@media screen and (max-width: 768px) {
+    .accordion-icon {
+        display: block; /* Show only on mobile */
+    }
+
+    .card-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, opacity 0.3s ease;
+        opacity: 0;
+    }
+
+    .analysis-card.active .card-body {
+        max-height: 500px; /* Arbitrary large height for animation */
+        opacity: 1;
+    }
+
+    .analysis-card {
+        padding: 16px !important;
+        cursor: pointer;
+    }
+
+    .card-header .card-icon {
+        margin-bottom: 0;
+    }
 }
 
 /* Right Panel: Chat Assistant */
@@ -591,3 +681,139 @@ input::placeholder {
     to { opacity: 1; transform: translateY(0); }
 }
 
+
+/* =============================================================
+   MINIMALIST MOBILE UX LAYER (Essential-Only interaction)
+   (Applied only for max-width: 1023px)
+   ============================================================= */
+
+@media screen and (max-width: 1023px) {
+    /* 1. Global Reset for Focus */
+    html, body {
+        overflow-x: hidden;
+        height: auto;
+    }
+
+    .dashboard-wrapper {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+        display: flex;
+    }
+
+    /* 2. Remove Non-Essential Clutter */
+    .header-actions {
+        display: none !important; /* Completely hide Copy/Download buttons on mobile */
+    }
+
+    .resize-handle {
+        display: none !important;
+    }
+
+    /* 3. Panel Stacking & Chat-First Hierarchy */
+    .side-panel, .center-panel {
+        width: 100% !important;
+        flex: none !important;
+        padding: 16px !important;
+        height: auto !important;
+        border: none !important;
+        border-bottom: 1px solid var(--glass-border) !important;
+        min-width: 0 !important;
+        max-width: none !important;
+    }
+
+    .left-panel {
+        order: 1; /* Input & Video first */
+        background: var(--bg-deep) !important;
+    }
+
+    .right-panel {
+        order: 2; /* Chatbot primary interaction */
+        background: var(--bg-mid) !important;
+        height: 600px !important;
+        border-bottom: 1px solid var(--glass-border) !important;
+    }
+
+    .center-panel {
+        order: 3; /* Insights follow below */
+        background: var(--bg-deep) !important;
+        padding-top: 24px !important;
+    }
+
+    /* 4. Minimalist Video & Input */
+    .video-player {
+        aspect-ratio: 16 / 9;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 12px;
+        margin-top: 12px;
+    }
+
+    .btn-analyze {
+        width: 100%;
+        height: 48px;
+        font-size: 1rem;
+    }
+
+    /* 5. Minimalist Header */
+    .dashboard-header {
+        margin-bottom: 16px;
+        border: none !important;
+        padding-bottom: 0;
+    }
+
+    .logo-text {
+        font-size: 1.4rem;
+        background: none !important;
+        -webkit-text-fill-color: var(--text-primary) !important;
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+        opacity: 0.6;
+    }
+
+    /* 6. Accordion Insight System */
+    .analysis-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .analysis-card {
+        padding: 12px 16px !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-radius: 12px !important;
+        cursor: pointer;
+    }
+
+    .accordion-icon {
+        display: block !important;
+        opacity: 0.5;
+    }
+
+    .card-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, opacity 0.2s;
+        opacity: 0;
+    }
+
+    .analysis-card.active .card-body {
+        max-height: 1000px;
+        opacity: 1;
+        padding-top: 8px;
+    }
+
+    /* 7. Touch Ergonomics */
+    input[type="text"], .chat-input {
+        font-size: 16px !important; /* Prevent iOS zoom */
+        height: 48px;
+    }
+
+    .message {
+        max-width: 92%;
+        padding: 0.9rem 1.1rem;
+        border-radius: 14px;
+    }
+}

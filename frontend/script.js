@@ -82,7 +82,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Update Left Panel (Video)
         videoIframe.src = `https://www.youtube.com/embed/${videoId}`;
+        
+        // Handle Video Loader Reveal
+        const placeholder = document.getElementById('videoPlaceholder');
+        if (placeholder) placeholder.style.display = 'none';
+        
         videoPreview.style.display = 'block';
+        setTimeout(() => {
+            videoPreview.classList.add('active');
+        }, 10);
+        
         videoInfo.style.display = 'block';
 
         vidTitle.textContent = data.title;
@@ -104,13 +113,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'analysis-card glass';
             card.innerHTML = `
-                <i data-lucide="${item.icon}" class="card-icon"></i>
-                <h3 class="card-title">${item.title}</h3>
-                <p class="card-content">${item.content}</p>
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i data-lucide="${item.icon}" class="card-icon"></i>
+                        <h3 class="card-title">${item.title}</h3>
+                    </div>
+                    <i data-lucide="chevron-down" class="accordion-icon"></i>
+                </div>
+                <div class="card-body">
+                    <p class="card-content">${item.content}</p>
+                </div>
             `;
-            if (item.isHtml) {
-                card.querySelector('.card-content').innerHTML = item.content;
-            }
+
+            // Accordion toggle logic for mobile
+            card.querySelector('.card-header').addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    const isActive = card.classList.contains('active');
+                    
+                    // Optional: Close other cards (Accordion mode)
+                    // document.querySelectorAll('.analysis-card').forEach(c => c.classList.remove('active'));
+                    
+                    if (!isActive) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
+                }
+            });
+
             analysisGrid.appendChild(card);
         });
 
