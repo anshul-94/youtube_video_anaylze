@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl
 
-from rag_analyze import YouTubeRAG
+from project.rag_analyze import YouTubeRAG
 
 # ── Logging ──────────────────────────────────────────────────
 logging.basicConfig(
