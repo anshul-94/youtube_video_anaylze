@@ -42,6 +42,17 @@ app.add_middleware(
 # ── Global RAG instance ───────────────────────────────────────
 rag = YouTubeRAG()
 
+# ── Middleware: Cache Busting ───────────────────────────────
+@app.middleware("http")
+async def disable_caching_middleware(request: Request, call_next):
+    response = await call_next(request)
+    # Intercept static asset requests and disable caching
+    if request.url.path.endswith((".css", ".js", ".html")):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 # ── Pydantic models ───────────────────────────────────────────
 class AnalyzeRequest(BaseModel):
     url: HttpUrl
