@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const minTime = new Promise(res => setTimeout(res, 1500));
-            const apiCall = fetch('http://localhost:8000/analyze', {
+            const apiCall = fetch('/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url })
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8000/chat', {
+            const response = await fetch('/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ question: text })

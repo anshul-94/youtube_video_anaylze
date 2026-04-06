@@ -10,9 +10,10 @@ import logging
 import asyncio
 from functools import partial
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
 
 from project.rag_analyze import YouTubeRAG
@@ -24,8 +25,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger("main")
 
+# ── Paths ─────────────────────────────────────────────────────
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+
 # ── App ───────────────────────────────────────────────────────
 app = FastAPI(title="Video Analyzer")
+
+# Static mounting (must be before or after routes, usually after catch-all or specific)
+# We mount it to /static so it doesn't conflict with root /
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 # CORS — allow all origins (safe for local development)
 app.add_middleware(
@@ -40,6 +49,19 @@ app.add_middleware(
 # Mutated only by /analyze (slow, serialised in practice).
 # Reads in /chat are GIL-safe. No threading.Lock required.
 rag = YouTubeRAG()
+
+
+# ── Frontend Routes ──────────────────────────────────────────
+@app.get("/")
+async def read_index():
+    """Serve the main index.html file."""
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
+
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint."""
+    return {"status": "healthy"}
 
 
 # ── Pydantic models ───────────────────────────────────────────
