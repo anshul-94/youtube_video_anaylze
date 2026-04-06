@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
 
-from project.rag_analyze import YouTubeRAG
+from rag_analyze import YouTubeRAG
 
 # ── Logging ──────────────────────────────────────────────────
 logging.basicConfig(
